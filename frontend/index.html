@@ -1,19 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Event Recorder</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Logger</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
-  <h1>Blockchain Event Record</h1>
-  <table id="eventTable">
-    <thead>
-      <tr><th>EventType</th><th>Timestamp</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <header>
+        <h1>Event Logger</h1>
+    </header>
+    <main>
+        <form id="logForm" action="/log_event" method="POST">
+            <label for="event_type">Event Type:</label>
+            <input type="text" id="event_type" name="event_type" required><br><br>
+            
+            <label for="timestamp">Timestamp:</label>
+            <input type="number" id="timestamp" name="timestamp" required><br><br>
+            
+            <button type="submit">Log Event</button>
+        </form>
 
-  <script src="script.js"></script>
+        <div class="log-buttons">
+            <button onclick="window.location.href='/get_logs';">View Logs</button>
+        </div>
+    </main>
 </body>
 </html>

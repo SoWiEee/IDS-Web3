@@ -1,24 +1,21 @@
 body {
-    background-color: #1e2a38;
-    color: #9ae6b4;
-    font-family: Arial, sans-serif;
-  }
-  
-  h1 {
-    text-align: center;
-    color: #9ae6b4;
-  }
-  
-  table {
-    margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
-    width: 80%;
-  }
-  
-  th, td {
-    border: 1px solid #9ae6b4;
-    padding: 8px;
-    text-align: center;
-  }
-  
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background-color: #f9f9f9;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+}
+
+input, button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
