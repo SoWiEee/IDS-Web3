@@ -1,18 +1,19 @@
-<!-- frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Blockchain Log Recorder</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Event Recorder</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Send Event Log to Blockchain</h1>
+  <h1>Blockchain Event Record</h1>
+  <table id="eventTable">
+    <thead>
+      <tr><th>EventType</th><th>Timestamp</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <input type="text" id="eventType" placeholder="Event Type">
-    <input type="text" id="description" placeholder="Description">
-    <button onclick="sendLog()">Submit</button>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
