@@ -16,7 +16,7 @@ contract EventLogger {
         emit SecurityEvent(eventType, timestamp);
     }
 
-    function getLogCount() public view returns (uint256) {
+    function getLogCount() public view returns (uint) {
         return logs.length;
     }
 

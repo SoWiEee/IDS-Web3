@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";  // 修正這裡，正確導入 Test.sol
+import "lib/forge-std/src/Test.sol";
 import {EventLogger} from "../src/EventLogger.sol";
 
 contract EventLoggerTest is Test {

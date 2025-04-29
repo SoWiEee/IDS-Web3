@@ -48,6 +48,7 @@ $ anvil
 ### Deploy
 
 ```shell
+$ forge script script/Deploy.s.sol:DeployScript --rpc-url http://localhost:8545 --broadcast
 $ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
 ```
 
@@ -64,3 +65,33 @@ $ forge --help
 $ anvil --help
 $ cast --help
 ```
+
+## Requirement
+* Foundry framework
+* Python Flask
+
+
+
+## Devlopment
+* Initialize project @IDS-Web3/
+```shell
+$ forge init --force
+```
+
+
+
+* Install all required package with this command:
+```shell
+$ uv pip install -r requirements.txt
+```
+
+* Start local test chain
+```
+$ anvil
+```
+
+* Deploy
+```shell
+$ forge script script/Deploy.s.sol:DeployScript --rpc-url http://localhost:8545 --broadcast
+```
+
