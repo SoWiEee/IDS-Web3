@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 from blockchain_writer import write_event_to_contract
 from web3 import Web3
 import os, json
+from threading import Thread
+from etw_listener import start_etw_listener
 from config import GANACHE_URL, CONTRACT_ADDRESS
 
 app = Flask(__name__)
@@ -14,9 +16,16 @@ w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
 sender_address = w3.eth.accounts[0]
 
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("index.html")
+    log_count = contract.functions.getLogCount().call()
+    logs = []
+
+    for i in range(log_count):
+        event_type, timestamp = contract.functions.getLog(i).call()
+        logs.append({"event_type": event_type, "timestamp": timestamp})
+    
+    return render_template('index.html', logs=logs)
 
 @app.route("/record_event", methods=["POST"])
 def record_event():
@@ -71,5 +80,6 @@ def get_logs():
         print(f"[!] Error calling getLogCount: {e}")
         return jsonify({"error": str(e)})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    Thread(target=start_etw_listener, daemon=True).start()
     app.run(debug=True)

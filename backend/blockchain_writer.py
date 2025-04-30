@@ -30,12 +30,3 @@ def write_event_to_contract(event_type: str, timestamp: int):
         print(f"[-] Failed to write event: {e}")
         raise e
 
-def read_all_logs():
-    log_count = contract.functions.getLogCount().call()
-    logs = []
-
-    for i in range(log_count):
-        event_type, timestamp = contract.functions.getLog(i).call()
-        logs.append({"event_type": event_type, "timestamp": timestamp})
-
-    return logs
