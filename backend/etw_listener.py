@@ -24,18 +24,22 @@ def start_etw_listener():
                 xml_str = win32evtlog.EvtRender(evt, win32evtlog.EvtRenderEventXml)
                 root = ET.fromstring(xml_str)
 
-                data = {elem.attrib['Name']: elem.text for elem in root.findall(".//EventData/Data")}
-
-                image = data.get("Image", "")
-                command_line = data.get("CommandLine", "")
-                pid = data.get("ProcessId", "")
+                ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
+                data = {d.attrib['Name']: d.text for d in root.findall('.//ns:Data', ns)}
 
                 payload = {
-                    "event_type": f"Process Created: {image} {command_line} (PID: {pid})",
-                    "timestamp": int(time.time())
+                    "event_type": "Process Created",
+                    "timestamp": int(time.time()),
+                    "image": data.get("Image", ""),
+                    "command_line": data.get("CommandLine", ""),
+                    "pid": data.get("ProcessId", ""),
+                    "user": data.get("User", ""),
+                    "integrity_level": data.get("IntegrityLevel", ""),
+                    "parent_image": data.get("ParentImage", ""),
+                    "hashes": data.get("Hashes", "")
                 }
 
-                print("[+] Detected process:", payload["event_type"])
+                print("[+] Detected process:", payload["image"])
 
                 try:
                     r = requests.post("http://localhost:5000/record_event", json=payload)
