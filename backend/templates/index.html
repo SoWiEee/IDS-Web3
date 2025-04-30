@@ -184,30 +184,30 @@
                                         <tr>
                                             <th>EventType</th>
                                             <th>Timestamp</th>
-                                            <!-- <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th> -->
+                                            <th>Image</th>
+                                            <th>Command Line</th>
+                                            <th>PID</th>
+                                            <th>User</th>
+                                            <th>Integrity Level</th>
+                                            <th>Parent Image</th>
+                                            <th>Hashes</th>
                                         </tr>
                                     </thead>
-                                    <!-- <tfoot>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </tfoot> -->
                                     <tbody>
                                         {% for log in logs %}
                                         <tr>
-                                          <td>{{ log.event_type }}</td>
-                                          <td>{{ log.timestamp }}</td>
+                                            <td>{{ log.event_type }}</td>
+                                            <td>{{ log.timestamp }}</td>
+                                            <td>{{ log.image }}</td>
+                                            <td>{{ log.command_line }}</td>
+                                            <td>{{ log.pid }}</td>
+                                            <td>{{ log.user }}</td>
+                                            <td>{{ log.integrity_level }}</td>
+                                            <td>{{ log.parent_image }}</td>
+                                            <td>{{ log.hashes }}</td>
                                         </tr>
                                         {% endfor %}
-                                    </tbody>
+                                    </tbody>                                    
                                 </table>
                             </div>
                         </div>
