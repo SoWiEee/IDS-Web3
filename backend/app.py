@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from blockchain_writer import write_event_to_contract
 from web3 import Web3
 import os, json, time
@@ -7,6 +8,7 @@ from etw_listener import start_etw_listener
 from config import GANACHE_URL, CONTRACT_ADDRESS
 
 app = Flask(__name__)
+CORS(app)  # allow vue call API
 logs = []
 
 with open(os.path.join(os.path.dirname(__file__), "contract_abi.json")) as f:
@@ -17,31 +19,18 @@ w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
 sender_address = w3.eth.accounts[0]
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    log_count = contract.functions.getLogCount().call()
+    return "Backend API is running."
 
-    for i in range(log_count):
-        log = contract.functions.getLog(i).call()
-        logs.append({
-            "event_type": log[0],
-            "timestamp": log[1],
-            "image": log[2],
-            "command_line": log[3],
-            "pid": log[4],
-            "user": log[5],
-            "integrity_level": log[6],
-            "parent_image": log[7],
-            "hashes": log[8]
-        })
-    
-    return render_template('index.html', logs=logs)
 
-@app.route("/record_event", methods=["POST"])
+@app.route("/api/record_event", methods=["POST"])
 def record_event():
     data = request.json
+
     try:
-        required_fields = ["event_type", "timestamp", "image", "command_line", "pid", "user", "integrity_level", "parent_image", "hashes"]
+        required_fields = ["event_type", "timestamp", "image", "command_line", "pid", "user", "integrity_level"]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing field: {field}"}), 400
@@ -53,33 +42,29 @@ def record_event():
             data["command_line"],
             data["pid"],
             data["user"],
-            data["integrity_level"],
-            data["parent_image"],
-            data["hashes"]
+            data["integrity_level"]
         )
         return jsonify({"status": "success", "tx_hash": tx_hash})
-
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route("/get_logs", methods=["GET"])
+
+@app.route("/api/logs", methods=["GET"])
 def get_logs():
-    try:
-        log_count = contract.functions.getLogCount().call()
-        logs = []
-
-        # Loop through the logs and fetch them
-        for i in range(log_count):
-            event_type, timestamp = contract.functions.getLog(i).call()
-            logs.append({
-                "event_type": event_type,
-                "timestamp": timestamp
-            })
-
-        return jsonify(logs)
-    except Exception as e:
-        print(f"[!] Error calling getLogCount: {e}")
-        return jsonify({"error": str(e)})
+    log_count = contract.functions.getLogCount().call()
+    logs = []
+    for i in range(log_count):
+        event = contract.functions.getLog(i).call()
+        logs.append({
+            "event_type": event[0],
+            "timestamp": event[1],
+            "image": event[2],
+            "command_line": event[3],
+            "pid": event[4],
+            "user": event[5],
+            "integrity_level": event[6],
+        })
+    return jsonify(logs)
 
 if __name__ == '__main__':
     Thread(target=start_etw_listener, daemon=True).start()
