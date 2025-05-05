@@ -10,7 +10,7 @@ w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
 sender_address = w3.eth.accounts[0]
 
-def write_event_to_contract(event_type, timestamp, image, command_line, pid, user, integrity_level, parent_image, hashes):
+def write_event_to_contract(event_type, timestamp, image, command_line, pid, user, integrity_level):
     tx = contract.functions.recordEvent(
         event_type,
         timestamp,
