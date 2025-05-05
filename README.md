@@ -42,7 +42,7 @@ $ forge build
 
 4. Deploy contract
 ```shell
-$ forge script script/Deploy.s.sol:DeployScript --rpc-url http://localhost:7545 --pricate_key 0x?? --broadcast
+$ forge script script/Deploy.s.sol:DeployScript --rpc-url http://localhost:7545 --private-key 0x?? --broadcast
 ```
 
 5. Run sysmon
