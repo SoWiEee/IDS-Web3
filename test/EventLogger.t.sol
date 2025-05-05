@@ -22,23 +22,17 @@ contract EventLoggerTest is Test {
         string memory integrityLevel = "High";
         //string memory parentImage = "explorer.exe";
 
-        logger.recordEvent(
-            eventType,
-            timestamp,
-            image,
-            commandLine,
-            pid,
-            user,
-            integrityLevel
-        );
+        logger.recordEvent(eventType, timestamp, image, commandLine, pid, user, integrityLevel);
 
-        (string memory _eventType,
-         uint256 _timestamp,
-         string memory _image,
-         string memory _commandLine,
-         string memory _pid,
-         string memory _user,
-         string memory _integrityLevel) = logger.getLog(0);
+        (
+            string memory _eventType,
+            uint256 _timestamp,
+            string memory _image,
+            string memory _commandLine,
+            string memory _pid,
+            string memory _user,
+            string memory _integrityLevel
+        ) = logger.getLog(0);
 
         assertEq(_eventType, eventType);
         assertEq(_timestamp, timestamp);
