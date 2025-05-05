@@ -66,6 +66,6 @@ def get_logs():
         })
     return jsonify(logs)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Thread(target=start_etw_listener, daemon=True).start()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
