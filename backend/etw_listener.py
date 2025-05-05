@@ -34,15 +34,13 @@ def start_etw_listener():
                     "command_line": data.get("CommandLine", ""),
                     "pid": data.get("ProcessId", ""),
                     "user": data.get("User", ""),
-                    "integrity_level": data.get("IntegrityLevel", ""),
-                    "parent_image": data.get("ParentImage", ""),
-                    "hashes": data.get("Hashes", "")
+                    "integrity_level": data.get("IntegrityLevel", "")
                 }
 
                 print("[+] Detected process:", payload["image"])
 
                 try:
-                    r = requests.post("http://localhost:5000/record_event", json=payload)
+                    r = requests.post("http://localhost:5000/api/record_event", json=payload)
                     print("[+] Log sent to backend:", r.status_code, r.text)
                 except Exception as e:
                     print("[-] Failed to send log:", e)
