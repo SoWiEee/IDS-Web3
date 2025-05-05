@@ -2,27 +2,65 @@
 pragma solidity ^0.8.13;
 
 contract EventLogger {
-    event SecurityEvent(string eventType, uint256 timestamp);
 
     struct Log {
         string eventType;
         uint256 timestamp;
+        string image;
+        string commandLine;
+        string pid;
+        string user;
+        string integrityLevel;
     }
 
     Log[] public logs;
 
-    function logEvent(string memory eventType, uint256 timestamp) public {
-        logs.push(Log(eventType, timestamp));
-        emit SecurityEvent(eventType, timestamp);
+    event SecurityEvent(
+        string eventType,
+        uint256 timestamp,
+        string image,
+        string commandLine,
+        string pid,
+        string user,
+        string integrityLevel
+    );
+
+    function recordEvent(
+        string memory eventType,
+        uint256 timestamp,
+        string memory image,
+        string memory commandLine,
+        string memory pid,
+        string memory user,
+        string memory integrityLevel
+    ) public {
+        logs.push(Log(eventType, timestamp, image, commandLine, pid, user, integrityLevel));
+        emit SecurityEvent(eventType, timestamp, image, commandLine, pid, user, integrityLevel);
     }
 
     function getLogCount() public view returns (uint) {
         return logs.length;
     }
 
-    function getLog(uint256 index) public view returns (string memory, uint256) {
-        require(index < logs.length, "Index out of range");
+    function getLog(uint index) public view returns (
+        string memory,
+        uint256,
+        string memory,
+        string memory,
+        string memory,
+        string memory,
+        string memory
+    ) {
+        require(index < logs.length, "Index out of bounds");
         Log memory log = logs[index];
-        return (log.eventType, log.timestamp);
+        return (
+            log.eventType,
+            log.timestamp,
+            log.image,
+            log.commandLine,
+            log.pid,
+            log.user,
+            log.integrityLevel
+        );
     }
 }
