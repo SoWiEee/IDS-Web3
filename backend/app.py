@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from blockchain_writer import write_event_to_contract
 from web3 import Web3
@@ -51,20 +51,24 @@ def record_event():
 
 @app.route("/api/logs", methods=["GET"])
 def get_logs():
-    log_count = contract.functions.getLogCount().call()
-    logs = []
-    for i in range(log_count):
-        event = contract.functions.getLog(i).call()
-        logs.append({
-            "event_type": event[0],
-            "timestamp": event[1],
-            "image": event[2],
-            "command_line": event[3],
-            "pid": event[4],
-            "user": event[5],
-            "integrity_level": event[6],
-        })
-    return jsonify(logs)
+    try:
+        log_count = contract.functions.getLogCount().call()
+        for i in range(log_count):
+            event = contract.functions.getLog(i).call()
+            logs.append({
+                "event_type": event[0],
+                "timestamp": event[1],
+                "image": event[2],
+                "command_line": event[3],
+                "pid": event[4],
+                "user": event[5],
+                "integrity_level": event[6],
+            })
+        return jsonify(logs)
+    except Exception as e:
+        print("[X] Failed to fetch logs:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == "__main__":
     Thread(target=start_etw_listener, daemon=True).start()

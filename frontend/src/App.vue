@@ -12,9 +12,9 @@
             :items="logs"
             class="elevation-1"
           >
-            <!-- <template #item.timestamp="{ item }">
+            <template #item.timestamp="{ item }">
               {{ formatTimestamp(item.timestamp) }}
-            </template> -->
+            </template>
           </v-data-table>
         </v-card>
       </v-container>
@@ -31,7 +31,7 @@ const logs = ref([])
 const headers = [
   { text: 'Event Type', value: 'event_type' },
   { text: 'Timestamp', value: 'timestamp' },
-  { text: 'Image Path', value: 'image_path' },
+  { text: 'Image Path', value: 'image' },
   { text: 'Command Line', value: 'command_line' },
   { text: 'PID', value: 'pid' },
   { text: 'User', value: 'user' },
@@ -43,7 +43,7 @@ const fetchLogs = async () => {
     const response = await axios.get('http://localhost:5000/api/logs')
     logs.value = response.data
   } catch (error) {
-    console.error('Error fetching logs:', error)
+    console.error('[X] Error fetching logs:', error)
   }
 }
 
@@ -52,5 +52,9 @@ const formatTimestamp = (timestamp) => {
   return date.toLocaleString()
 }
 
-onMounted(fetchLogs)
+onMounted(() => {
+  fetchLogs()
+  setInterval(fetchLogs, 5000)  // update per 5 secs
+});
+
 </script>
