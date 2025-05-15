@@ -6,13 +6,13 @@ This is a application for blockchain course project, it implements:
 
 # Requirement
 
-* Foundry [doc](!https://book.getfoundry.sh/) - fast contract dev tools
+* Foundry [doc](https://book.getfoundry.sh/) - fast contract dev tools
 * Python Flask
-* [Node.js](!https://nodejs.org/en) Vue dependency
-* [Vue](!https://vuejs.org/guide/quick-start.html) - progressive framework
-* [Vite](!https://vite.dev/guide/) - very fast builder and bundler
-* [Vuetify](!https://vuetifyjs.com/en/getting-started/installation/#installation) - component library
-* [Sysmon](!https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) - event monitor
+* [Node.js](https://nodejs.org/en) Vue dependency
+* [Vue](https://vuejs.org/guide/quick-start.html) - progressive framework
+* [Vite](https://vite.dev/guide/) - very fast builder and bundler
+* [Vuetify](https://vuetifyjs.com/en/getting-started/installation/#installation) - component library
+* [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) - event monitor
 
 
 ## Foundry
