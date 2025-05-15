@@ -7,10 +7,33 @@
             <v-icon class="mr-2">mdi-shield-alert</v-icon>
             Security Event Logs
           </v-card-title>
+          <!-- Filter Area -->
+          <v-row class="pa-4" dense>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="search"
+                label="模糊搜尋"
+                prepend-icon="mdi-magnify"
+                clearable
+              />
+            </v-col>
+
+            <v-col cols="12" sm="6" md="4">
+              <v-select
+                v-model="selectedEventTypes"
+                :items="eventTypeOptions"
+                label="事件類型篩選"
+                multiple
+                clearable
+              />
+            </v-col>
+          </v-row>
+          <!-- Table -->
           <v-data-table
             :headers="headers"
-            :items="logs"
-            class="elevation-1 border border-primary"
+            :items="filteredLogs"
+            class="elevation-1"
+            :items-per-page="10"
           >
             <template #item.timestamp="{ item }">
               <span class="text-secondary">{{ formatTimestamp(item.timestamp) }}</span>
@@ -25,49 +48,58 @@
   </v-app>
 </template>
 
-<script>
-import { ref, onMounted } from "vue";
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
-export default {
-  setup() {
-    const headers = ref([
-      { text: 'Event Type', align: 'start', key: 'event_type' },
-      { text: 'Image', align: 'start', key: 'image' },
-      { text: 'Command Line', align: 'start', key: 'command_line' },
-      { text: 'PID', align: 'start', key: 'pid' },
-      { text: 'User', align: 'start', key: 'user' },
-      { text: 'Integrity Level', align: 'start', key: 'integrity_level' },
-      { text: 'Timestamp', align: 'start', key: 'timestamp' }
-    ]);
-    
-    const logs = ref([]);
+const logs = ref([])
+const search = ref('')
+const selectedEventTypes = ref([])
 
-    const formatTimestamp = (timestamp) => {
-      const date = new Date(timestamp * 1000);
-      return date.toLocaleString();
-    };
+const headers = [
+  { text: 'Event Type', value: 'event_type' },
+  { text: 'Image', value: 'image' },
+  { text: 'Command Line', value: 'command_line' },
+  { text: 'User', value: 'user' },
+  { text: 'Integrity Level', value: 'integrity_level' },
+  { text: 'PID', value: 'pid' },
+  { text: 'Timestamp', value: 'timestamp' },
+]
 
-    const fetchLogs = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/logs");
-        const data = await response.json();
-        logs.value = data;
-      } catch (error) {
-        console.error("Error fetching logs:", error);
-      }
-    };
+const eventTypeOptions = computed(() => {
+  const set = new Set(logs.value.map(l => l.event_type))
+  return Array.from(set)
+})
 
-    onMounted(() => {
-      setInterval(() => {
-        fetchLogs();
-      }, 5000);
-    });
+// filter
+const filteredLogs = computed(() => {
+  return logs.value.filter(log => {
+    const matchesSearch = Object.values(log).some(val =>
+      String(val).toLowerCase().includes(search.value.toLowerCase())
+    )
+    const matchesType =
+      selectedEventTypes.value.length === 0 ||
+      selectedEventTypes.value.includes(log.event_type)
 
-    return {
-      headers,
-      logs,
-      formatTimestamp,
-    };
+    return matchesSearch && matchesType
+  })
+})
+
+onMounted(() => {
+  const fetchLogs = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/logs')
+      logs.value = response.data
+    } catch (error) {
+      console.error('Error fetching logs:', error)
+    }
   }
-};
+  fetchLogs()   // initial fetch
+  setInterval(fetchLogs, 5000)  // fetch every 5 seconds
+})
+
+function formatTimestamp(ts) {
+  const date = new Date(ts * 1000)
+  return date.toLocaleString()
+}
 </script>
