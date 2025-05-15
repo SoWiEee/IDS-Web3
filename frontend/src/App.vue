@@ -71,7 +71,7 @@ const eventTypeOptions = computed(() => {
   return Array.from(set)
 })
 
-// filter
+// fuzzing filter
 const filteredLogs = computed(() => {
   return logs.value.filter(log => {
     const matchesSearch = Object.values(log).some(val =>
