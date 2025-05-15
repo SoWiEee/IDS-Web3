@@ -40,7 +40,7 @@ def start_etw_listener():
                 print("[+] Detected process:", payload["image"])
 
                 try:
-                    r = requests.post("http://localhost:5000/api/record_event", json=payload)
+                    r = requests.post("http://localhost:5000/api/logs", json=payload)
                     print("[+] Log sent to backend:", r.status_code, r.text)
                 except Exception as e:
                     print("[-] Failed to send log:", e)
