@@ -57,13 +57,13 @@ const search = ref('')
 const selectedEventTypes = ref([])
 
 const headers = [
-  { text: 'Event Type', value: 'event_type' },
-  { text: 'Image', value: 'image' },
-  { text: 'Command Line', value: 'command_line' },
-  { text: 'User', value: 'user' },
-  { text: 'Integrity Level', value: 'integrity_level' },
-  { text: 'PID', value: 'pid' },
-  { text: 'Timestamp', value: 'timestamp' },
+  { text: 'Event Type', value: 'event_type', sortable: true },
+  { text: 'Image', value: 'image', sortable: true },
+  { text: 'Command Line', value: 'command_line', sortable: true },
+  { text: 'User', value: 'user', sortable: true },
+  { text: 'Integrity Level', value: 'integrity_level', sortable: true },
+  { text: 'PID', value: 'pid', sortable: true },
+  { text: 'Timestamp', value: 'timestamp', sortable: true },
 ]
 
 const eventTypeOptions = computed(() => {
