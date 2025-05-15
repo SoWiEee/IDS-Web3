@@ -33,6 +33,7 @@
             :headers="headers"
             :items="filteredLogs"
             class="elevation-1"
+            :search="''"
             :items-per-page="10"
           >
             <template #item.timestamp="{ item }">
@@ -49,12 +50,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
+import Fuse from 'fuse.js'
 
 const logs = ref([])
 const search = ref('')
 const selectedEventTypes = ref([])
+const filteredLogs = ref([])
 
 const headers = [
   { text: 'Event Type', value: 'event_type', sortable: true },
@@ -71,19 +74,37 @@ const eventTypeOptions = computed(() => {
   return Array.from(set)
 })
 
-// fuzzing filter
-const filteredLogs = computed(() => {
-  return logs.value.filter(log => {
-    const matchesSearch = Object.values(log).some(val =>
-      String(val).toLowerCase().includes(search.value.toLowerCase())
-    )
-    const matchesType =
-      selectedEventTypes.value.length === 0 ||
-      selectedEventTypes.value.includes(log.event_type)
+let fuse = null
 
-    return matchesSearch && matchesType
+// fuzzing filter
+const updateFilteredLogs = () => {
+  let temp = logs.value
+
+  // 1. Event Type
+  if (selectedEventTypes.value.length > 0) {
+    temp = temp.filter(log => selectedEventTypes.value.includes(log.event_type))
+  }
+
+  // 2. Fuzzing Search
+  if (search.value.trim() !== '' && fuse) {
+    const fuseResults = fuse.search(search.value.trim())
+    temp = fuseResults.map(result => result.item)
+  }
+
+  filteredLogs.value = temp
+}
+
+// create Fue after logs loaded
+watch(logs, () => {
+  fuse = new Fuse(logs.value, {
+    keys: ['event_type', 'image', 'command_line', 'user', 'integrity_level', 'pid', 'timestamp'],
+    threshold: 0.6,   // 模糊靈敏度
   })
+  updateFilteredLogs()
 })
+
+// watch for search and selectedEventTypes changes
+watch([search, selectedEventTypes], updateFilteredLogs)
 
 onMounted(() => {
   const fetchLogs = async () => {
