@@ -1,3 +1,4 @@
+import os, json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from blockchain_writer import write_logs_to_contract, get_logs_from_contract
@@ -47,6 +48,22 @@ def get_logs():
     except Exception as e:
         print("[X] Failed to fetch logs:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/malicious', methods=['GET'])
+def get_malicious_logs():
+    filepath = 'malicious_logs.json'
+    if not os.path.exists(filepath):
+        return jsonify([])
+
+    try:
+        with open(filepath, 'r') as f:
+            logs = json.load(f)
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({"error": "Failed to read malicious logs", "details": str(e)}), 500
+
+
 
 
 if __name__ == "__main__":
