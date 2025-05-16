@@ -54,7 +54,6 @@ def get_logs_from_contract():
 
 
 def write_maliciousLogs_to_contract(payload):
-    
     try:
         tx = malicious_contract.functions.addMaliciousLog({
             "event_type": payload["event_type"],
@@ -84,7 +83,7 @@ def write_maliciousLogs_to_contract(payload):
 
 def get_malicious_logs_from_contract():
     try:
-        logs_count = malicious_contract.functions.getMaliciousLogCount().call()
+        logs_count = malicious_contract.functions.getLogsCount().call()
         logs = []
         for i in range(logs_count):
             log = malicious_contract.functions.getMaliciousLog(i).call()
