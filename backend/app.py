@@ -1,7 +1,7 @@
 import os, json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from blockchain_writer import write_logs_to_contract, get_logs_from_contract
+from blockchain_writer import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract
 from threading import Thread
 from etw_listener import start_etw_listener
 
@@ -64,6 +64,19 @@ def get_malicious_logs():
         return jsonify({"error": "Failed to read malicious logs", "details": str(e)}), 500
 
 
+@app.route('/api/malicious', methods=['POST'])
+def write_malicious_log():
+    try:
+        payload = request.get_json()
+        if not payload:
+            return jsonify({"error": "No payload provided"}), 400
+
+        tx_hash = write_maliciousLogs_to_contract(payload)
+
+        return jsonify({"status": "ok", "tx_hash": tx_hash}), 200
+    except Exception as e:
+        print(f"[!] Error handling malicious log: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
