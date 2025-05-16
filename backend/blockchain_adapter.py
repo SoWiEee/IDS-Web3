@@ -2,8 +2,11 @@ from web3 import Web3
 import json, os
 from config import GANACHE_URL, PRIVATE_KEY, CONTRACT_ADDRESS
 
-with open(os.path.join(os.path.dirname(__file__), "contract_abi.json")) as f:
-        abi = json.load(f)
+# load contract ABI
+with open("contract_abi.json", "r") as f:
+    abis = json.load(f)
+    event_logger_abi = abis["EventLogger"]
+    malicious_logger_abi = abis["MaliciousLogger"]
 
 w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
