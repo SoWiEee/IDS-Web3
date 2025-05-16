@@ -1,7 +1,7 @@
 import os, json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from backend.blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
+from blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
 from threading import Thread
 from etw_listener import start_etw_listener
 
