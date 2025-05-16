@@ -39,16 +39,18 @@ contract MaliciousLogger {
     }
 
     function addMaliciousLog(MaliciousLogInput calldata input) public {
-        maliciousLogs.push(MaliciousLog(
-            input.event_type,
-            input.timestamp,
-            input.image,
-            input.command_line,
-            input.pid,
-            input.user,
-            input.integrity_level,
-            input.detail
-        ));
+        maliciousLogs.push(
+            MaliciousLog(
+                input.event_type,
+                input.timestamp,
+                input.image,
+                input.command_line,
+                input.pid,
+                input.user,
+                input.integrity_level,
+                input.detail
+            )
+        );
 
         emit MaliciousLogAdded(
             input.event_type,
@@ -72,39 +74,25 @@ contract MaliciousLogger {
         string memory integrity_level,
         string memory detail
     ) public {
-        maliciousLogs.push(MaliciousLog(
-            event_type,
-            timestamp,
-            image,
-            command_line,
-            pid,
-            user,
-            integrity_level,
-            detail
-        ));
+        maliciousLogs.push(MaliciousLog(event_type, timestamp, image, command_line, pid, user, integrity_level, detail));
 
-        emit MaliciousLogAdded(
-            event_type,
-            timestamp,
-            image,
-            command_line,
-            pid,
-            user,
-            integrity_level,
-            detail
-        );
+        emit MaliciousLogAdded(event_type, timestamp, image, command_line, pid, user, integrity_level, detail);
     }
 
-    function getMaliciousLog(uint index) public view returns (
-        string memory,
-        uint256,
-        string memory,
-        string memory,
-        string memory,
-        string memory,
-        string memory,
-        string memory
-    ) {
+    function getMaliciousLog(uint256 index)
+        public
+        view
+        returns (
+            string memory,
+            uint256,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            string memory
+        )
+    {
         MaliciousLog memory log = maliciousLogs[index];
         return (
             log.event_type,
@@ -118,7 +106,7 @@ contract MaliciousLogger {
         );
     }
 
-    function getLogsCount() public view returns (uint) {
+    function getLogsCount() public view returns (uint256) {
         return maliciousLogs.length;
     }
 }
