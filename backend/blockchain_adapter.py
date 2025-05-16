@@ -9,7 +9,7 @@ with open("contract_abi.json", "r") as f:
     malicious_logger_abi = abis["MaliciousLogger"]
 
 w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
-contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abis)
 sender_address = w3.eth.accounts[0]
 
 
