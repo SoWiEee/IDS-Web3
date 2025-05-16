@@ -77,3 +77,24 @@ def write_maliciousLogs_to_contract(payload):
         print(f"[!] Failed to write malicious log to contract: {e}")
         return None
 
+
+def get_malicious_logs_from_contract():
+    try:
+        logs_count = contract.functions.getMaliciousLogCount().call()
+        logs = []
+        for i in range(logs_count):
+            log = contract.functions.getMaliciousLog(i).call()
+            logs.append({
+                "event_type": log[0],
+                "timestamp": log[1],
+                "image": log[2],
+                "command_line": log[3],
+                "pid": log[4],
+                "user": log[5],
+                "integrity_level": log[6],
+                "detail": log[7]
+            })
+        return logs
+    except Exception as e:
+        print(f"[!] Failed to fetch malicious logs: {e}")
+        return None
