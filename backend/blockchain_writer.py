@@ -50,17 +50,18 @@ def get_logs_from_contract():
 
 
 def write_maliciousLogs_to_contract(payload):
+    
     try:
-        tx = contract.functions.addMaliciousLog(
-            payload.get("event_type", ""),
-            int(payload.get("timestamp", 0)),
-            payload.get("image", ""),
-            payload.get("command_line", ""),
-            payload.get("pid", ""),
-            payload.get("user", ""),
-            payload.get("integrity_level", ""),
-            payload.get("detail", "")
-        ).build_transaction({
+        tx = contract.functions.addMaliciousLog({
+            "event_type": payload["event_type"],
+            "timestamp": int(payload["timestamp"]),
+            "image": payload["image"],
+            "command_line": payload["command_line"],
+            "pid": payload["pid"],
+            "user": payload["user"],
+            "integrity_level": payload["integrity_level"],
+            "detail": payload["detail"]
+        }).build_transaction({
             "from": sender_address,
             "nonce": w3.eth.get_transaction_count(sender_address),
             "gas": 3000000,
