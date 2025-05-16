@@ -9,12 +9,13 @@ with open("contract_abi.json", "r") as f:
     malicious_logger_abi = abis["MaliciousLogger"]
 
 w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
-contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abis)
+normal_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=event_logger_abi)
+malicious_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=malicious_logger_abi)
 sender_address = w3.eth.accounts[0]
 
 
 def write_logs_to_contract(event_type, timestamp, image, command_line, pid, user, integrity_level):
-    tx = contract.functions.recordEvent(
+    tx = normal_contract.functions.recordEvent(
         event_type,
         timestamp,
         image,
@@ -36,10 +37,10 @@ def write_logs_to_contract(event_type, timestamp, image, command_line, pid, user
 
 
 def get_logs_from_contract():
-    log_count = contract.functions.getLogCount().call()
+    log_count = normal_contract.functions.getLogCount().call()
     logs = []
     for i in range(log_count):
-        event = contract.functions.getLog(i).call()
+        event = normal_contract.functions.getLog(i).call()
         logs.append({
             "event_type": event[0],
             "timestamp": event[1],
@@ -55,7 +56,7 @@ def get_logs_from_contract():
 def write_maliciousLogs_to_contract(payload):
     
     try:
-        tx = contract.functions.addMaliciousLog({
+        tx = malicious_contract.functions.addMaliciousLog({
             "event_type": payload["event_type"],
             "timestamp": int(payload["timestamp"]),
             "image": payload["image"],
@@ -83,10 +84,10 @@ def write_maliciousLogs_to_contract(payload):
 
 def get_malicious_logs_from_contract():
     try:
-        logs_count = contract.functions.getMaliciousLogCount().call()
+        logs_count = malicious_contract.functions.getMaliciousLogCount().call()
         logs = []
         for i in range(logs_count):
-            log = contract.functions.getMaliciousLog(i).call()
+            log = malicious_contract.functions.getMaliciousLog(i).call()
             logs.append({
                 "event_type": log[0],
                 "timestamp": log[1],
