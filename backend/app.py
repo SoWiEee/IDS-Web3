@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
 from threading import Thread
-from etw_listener import start_etw_listener
+from etw_listener import listen_security_log, listen_sysmon
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])    # allow Vue call API
@@ -78,5 +78,6 @@ def write_malicious_log():
 
 
 if __name__ == "__main__":
-    Thread(target=start_etw_listener, daemon=True).start()
+    Thread(target=listen_security_log, daemon=True).start()
+    Thread(target=listen_sysmon, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
