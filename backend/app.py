@@ -66,6 +66,7 @@ def get_malicious_logs():
 def write_malicious_log():
     try:
         payload = request.get_json()
+
         if not payload:
             return jsonify({"error": "No payload provided"}), 400
 
@@ -79,5 +80,5 @@ def write_malicious_log():
 
 if __name__ == "__main__":
     Thread(target=listen_security_log, daemon=True).start()
-    Thread(target=listen_sysmon, daemon=True).start()
+    # Thread(target=listen_sysmon, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)

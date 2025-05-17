@@ -5,9 +5,18 @@ import time
 import xml.etree.ElementTree as ET
 import requests
 
-def start_etw_listener():
-    query = "*[System[Provider[@Name='Microsoft-Windows-Sysmon'] and (EventID=1 or EventID=7)]]"
-    #query = "*[System[Provider[@Name='Microsoft-Windows-Sysmon'] and EventID=1]]"
+def send_payload(endpoint, payload):
+    try:
+        r = requests.post(endpoint, json=payload)
+        if r.status_code == 200:
+            print("[+] Payload sent successfully")
+        else:
+            print(f"[!] Failed to send payload: {r.status_code} {r.text}")
+    except Exception as e:
+        print("[!] Exception when sending payload:", e)
+
+def listen_sysmon():
+    query = "*[System[Provider[@Name='Microsoft-Windows-Sysmon'] and (EventID=1)]]"
     log_type = "Microsoft-Windows-Sysmon/Operational"
     flags = win32evtlog.EvtQueryReverseDirection | win32evtlog.EvtQueryChannelPath
     handle = win32evtlog.EvtQuery(log_type, flags, query)
@@ -47,58 +56,79 @@ def start_etw_listener():
                         "event_type": "Process Created",
                         **base_payload
                     }
-                    endpoint = "http://localhost:5000/api/logs"
-                    
+
                     print("[+] Detected process:", payload["image"])
-
-
-                # Event ID 7 (Image Loaded)
-                elif event_id == 7:
-                    image_loaded = data.get("ImageLoaded", "").lower()
-
-                    if is_dll_injection(payload, image_loaded):
-                        print("[!] DLL Injection detected:", payload["command_line"])
-                        payload = {
-                            "event_type": "DLL Injection",
-                            **base_payload,
-                            "detail": f"Suspicious DLL loaded from {image_loaded}"
-                        }
-                        endpoint = "http://localhost:5000/api/malicious"
-                
-                
-                print(f"[+] Sending event to {endpoint}: {payload}")
-                try:
-                    r = requests.post(endpoint, json=payload)
-                    print("[+] Sent successfully:", r.status_code)
-                except Exception as e:
-                    print("[-] Failed to send log:", e)
-
-
+                    endpoint = "http://localhost:5000/api/logs"
+                    send_payload(endpoint, payload)
+                    
             except Exception as e:
                 print("[-] Failed to parse or send event:", e)
 
         time.sleep(5)
 
 
-def is_dll_injection(data, image_path):
-    suspicious_dlls = ["evil.dll", "injectme.dll"]
-    suspicious_paths = ["c:\\temp", "c:\\users\\public"]
+def listen_security_log():
+    logtype = 'Security'
+    query = "*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and EventID=4624]]"
+    flags = win32evtlog.EvtQueryReverseDirection | win32evtlog.EvtQueryChannelPath
 
-    dangerous_targets = ["explorer.exe", "lsass.exe", "svchost.exe"]
+    try:
+        hand = win32evtlog.EvtQuery(logtype, flags, query)
+    except Exception as e:
+        print("[!] Failed to query Security log:", e)
+        return
     
-    process_name = data.get("Image", "").lower()
+    seen_records = set()
 
-    # suspicious info
-    if any(dll in image_path for dll in suspicious_dlls) or \
-       any(p in image_path for p in suspicious_paths):
-        return True
+    while True:
+        try:
+            events = win32evtlog.EvtNext(hand, 10)
+        except Exception as e:
+            print("[!] Failed to read Security log:", e)
+            time.sleep(1)
+            continue
 
-    # suspicious inject to process
-    if any(target in process_name for target in dangerous_targets):
-        return True
+        if not events:
+            time.sleep(1)
+            continue
 
-    return False
+        for event in events:
+            try:
+                xml_str = win32evtlog.EvtRender(event, win32evtlog.EvtRenderEventXml)
+                root = ET.fromstring(xml_str)
+                ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
+
+                event_id = int(root.find('./ns:System/ns:EventID', ns).text)
+                record_id = int(root.find('./ns:System/ns:EventRecordID', ns).text)
+
+                if record_id in seen_records:
+                    continue
+                seen_records.add(record_id)
+
+                if event_id == 4624:
+                    timestamp = int(time.time())
+                    data = {d.attrib['Name']: d.text for d in root.findall('.//ns:Data', ns)}
+
+                    payload = {
+                        "event_type": "Logon",
+                        "timestamp": timestamp,
+                        "image": data.get("ProcessName", ""),
+                        "command_line": data.get("LogonProcessName", ""),
+                        "pid": data.get("ProcessId", ""),
+                        "user": data.get("TargetUserName", ""),
+                        "integrity_level": data.get("ImpersonationLevel", ""),
+                        "detail": data.get("LogonType", "")
+                    }
+
+                    print("[+] Detected Logon event:", payload["user"])
+                    endpoint = "http://localhost:5000/api/malicious"
+                    send_payload(endpoint, payload)
+
+            except Exception as e:
+                print("[!] Failed to parse Logon event:", e)
+
+        time.sleep(1)
 
 
 if __name__ == "__main__":
-    start_etw_listener()
+    print("[*] Started Sysmon and Security Log listeners")

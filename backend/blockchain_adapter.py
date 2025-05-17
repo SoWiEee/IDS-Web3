@@ -15,6 +15,7 @@ sender_address = w3.eth.accounts[0]
 
 
 def write_logs_to_contract(event_type, timestamp, image, command_line, pid, user, integrity_level):
+    
     tx = normal_contract.functions.recordEvent(
         event_type,
         timestamp,
@@ -54,17 +55,21 @@ def get_logs_from_contract():
 
 
 def write_maliciousLogs_to_contract(payload):
+    print("[DEBUG] Payload to contract:")
+    for k, v in payload.items():
+        print(f"  {k}: {repr(v)} (len={len(v) if isinstance(v, str) else 'N/A'})")
+    
     try:
-        tx = malicious_contract.functions.addMaliciousLog({
-            "event_type": payload["event_type"],
-            "timestamp": int(payload["timestamp"]),
-            "image": payload["image"],
-            "command_line": payload["command_line"],
-            "pid": payload["pid"],
-            "user": payload["user"],
-            "integrity_level": payload["integrity_level"],
-            "detail": payload["detail"]
-        }).build_transaction({
+        tx = malicious_contract.functions.addMaliciousLog(
+            payload["event_type"],
+            int(payload["timestamp"]),
+            payload["image"],
+            payload["command_line"],
+            "8877",
+            payload["user"],
+            "1833",
+            payload["detail"]
+        ).build_transaction({
             "from": sender_address,
             "nonce": w3.eth.get_transaction_count(sender_address),
             "gas": 3000000,
