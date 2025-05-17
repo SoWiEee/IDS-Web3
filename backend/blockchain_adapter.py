@@ -65,9 +65,9 @@ def write_maliciousLogs_to_contract(payload):
             int(payload["timestamp"]),
             payload["image"],
             payload["command_line"],
-            "8877",
+            str(int(payload["pid"], 16)),
             payload["user"],
-            "1833",
+            payload["integrity_level"],
             payload["detail"]
         ).build_transaction({
             "from": sender_address,
