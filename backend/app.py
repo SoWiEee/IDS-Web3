@@ -1,17 +1,44 @@
-import os, json
 from flask import Flask, request, jsonify
+from config import GEMINI_API_KEY, GEMINI_API_SECRET
+from gemini import Gemini
 from flask_cors import CORS
 from blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
 from threading import Thread
 from etw_listener import listen_security_log, listen_sysmon, listen_sysmon_registry
 
+
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])    # allow Vue call API
-# logs = []
+gemini = Gemini(GEMINI_API_KEY, GEMINI_API_SECRET)
 
 @app.route("/")
 def index():
     return "[V] Backend API is running!"
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_logs():
+    try:
+        data = request.get_json()
+        logs = data.get('logs', [])
+
+        if not logs:
+            return jsonify({'result': '⚠️ 沒有收到任何紀錄資料'}), 400
+
+        summary = "\n".join(
+            f"{log.get('timestamp', '')} | {log.get('event_type', '')} | {log.get('command_line', '')}"
+            for log in logs
+        )
+
+        prompt = f"""你是一個資安分析助理，請根據以下紀錄判斷是否有異常或惡意事件，並用繁體中文解釋：
+{summary}
+請指出可疑事件的時間、類型及可能風險。"""
+
+        result = gemini.generate_content(prompt)
+        return jsonify({'result': result})
+
+    except Exception as e:
+        return jsonify({'message': f'分析過程發生錯誤: {str(e)}'}), 500
+
 
 
 @app.route("/api/logs", methods=["POST"])
