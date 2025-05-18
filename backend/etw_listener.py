@@ -114,7 +114,7 @@ def listen_security_log():
                         "timestamp": timestamp,
                         "image": data.get("ProcessName", ""),
                         "command_line": data.get("LogonProcessName", ""),
-                        "pid": data.get("ProcessId", ""),
+                        "pid": int(data.get("ProcessId", ""), 16),
                         "user": data.get("TargetUserName", ""),
                         "integrity_level": data.get("ImpersonationLevel", ""),
                         "detail": data.get("LogonType", "")
@@ -129,6 +129,67 @@ def listen_security_log():
 
         time.sleep(1)
 
+
+def listen_sysmon_registry():
+    logtype = 'Microsoft-Windows-Sysmon/Operational'
+    query = "*[System[Provider[@Name='Microsoft-Windows-Sysmon'] and (EventID=13 or EventID=14)]]"
+    flags = win32evtlog.EvtQueryReverseDirection | win32evtlog.EvtQueryChannelPath
+
+    try:
+        hand = win32evtlog.EvtQuery(logtype, flags, query)
+    except Exception as e:
+        print("[!] Failed to query Sysmon log:", e)
+        return
+
+    seen_records = set()
+
+    while True:
+        try:
+            events = win32evtlog.EvtNext(hand, 10)
+        except Exception as e:
+            print("[!] Failed to read Sysmon log:", e)
+            time.sleep(1)
+            continue
+
+        if not events:
+            time.sleep(1)
+            continue
+
+        for event in events:
+            try:
+                xml_str = win32evtlog.EvtRender(event, win32evtlog.EvtRenderEventXml)
+                root = ET.fromstring(xml_str)
+                ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
+
+                #event_id = int(root.find('./ns:System/ns:EventID', ns).text)
+                record_id = int(root.find('./ns:System/ns:EventRecordID', ns).text)
+
+                if record_id in seen_records:
+                    continue
+                seen_records.add(record_id)
+
+                timestamp = int(time.time())
+                data = {d.attrib['Name']: d.text for d in root.findall('.//ns:Data', ns)}
+
+                payload = {
+                    "event_type": "Registry " + data.get("EventType", ""),
+                    "timestamp": timestamp,
+                    "command_line": data.get("TargetObject", ""),
+                    "image": data.get("Image", ""),
+                    "user": data.get("User", ""),
+                    "pid": data.get("ProcessID", ""),
+                    "integrity_level": data.get("ImpersonationLevel", ""),
+                    "detail": data.get("Details", "")
+                }
+
+                print("[+] Registry Event Detected:", payload["command_line"])
+                endpoint = "http://localhost:5000/api/malicious"
+                send_payload(endpoint, payload)
+
+            except Exception as e:
+                print("[!] Failed to parse Sysmon event:", e)
+
+        time.sleep(1)
 
 if __name__ == "__main__":
     print("[*] Started Sysmon and Security Log listeners")
