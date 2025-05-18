@@ -162,9 +162,10 @@ const triggerAI = async () => {
   error.value = ''
 
   try {
+    const recentLogs = logs.value.slice(-30)
     const res = await axios.post('http://localhost:5000/api/analyze', {
-      logs: filteredLogs.value
-    })
+      logs: recentLogs
+    }, { timeout: 20000 })
     response.value = res.data.result
   } catch (err) {
     error.value = err?.response?.data?.message || 'AI 分析失敗'
@@ -172,6 +173,7 @@ const triggerAI = async () => {
     loading.value = false
   }
 }
+
 </script>
 
 <style scoped>
