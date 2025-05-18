@@ -21,12 +21,13 @@ import axios from 'axios'
 const logs = ref([])
 
 const headers = [
-  { text: 'Timestamp', value: 'timestamp' },
-  { text: 'Technique', value: 'event_type' },
-  { text: 'Description', value: 'detail' },
-  { text: 'Process Image', value: 'image' },
-  { text: 'PID', value: 'pid' },
-  { text: 'User', value: 'user' }
+  { text: 'Technique', value: 'event_type', sortable: true },
+  { text: 'Process Image', value: 'image', sortable: true },
+  { text: 'Command Line', value: 'command_line', sortable: true },
+  { text: 'Description', value: 'detail', sortable: true },
+  { text: 'PID', value: 'pid', sortable: true },
+  { text: 'User', value: 'user', sortable: true },
+  { text: 'Timestamp', value: 'timestamp', sortable: true },
 ]
 
 onMounted(() => {
