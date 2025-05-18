@@ -1,6 +1,6 @@
 from web3 import Web3
 import json, os
-from config import GANACHE_URL, PRIVATE_KEY, CONTRACT_ADDRESS
+from config import GANACHE_URL, PRIVATE_KEY, CONTRACT_ADDRESS1, CONTRACT_ADDRESS2
 
 # load contract ABI
 with open("contract_abi.json", "r") as f:
@@ -9,8 +9,8 @@ with open("contract_abi.json", "r") as f:
     malicious_logger_abi = abis["MaliciousLogger"]
 
 w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
-normal_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=event_logger_abi)
-malicious_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=malicious_logger_abi)
+normal_contract = w3.eth.contract(address=CONTRACT_ADDRESS1, abi=event_logger_abi)
+malicious_contract = w3.eth.contract(address=CONTRACT_ADDRESS2, abi=malicious_logger_abi)
 sender_address = w3.eth.accounts[0]
 
 
@@ -26,7 +26,7 @@ def write_logs_to_contract(event_type, timestamp, image, command_line, pid, user
         integrity_level
     ).build_transaction({
         "from": sender_address,
-        "nonce": w3.eth.get_transaction_count(sender_address),
+        "nonce": w3.eth.get_transaction_count(sender_address, 'pending'),
         "gas": 3000000,
         "gasPrice": w3.to_wei("20", "gwei")
     })
@@ -71,7 +71,7 @@ def write_maliciousLogs_to_contract(payload):
             payload["detail"]
         ).build_transaction({
             "from": sender_address,
-            "nonce": w3.eth.get_transaction_count(sender_address),
+            "nonce": w3.eth.get_transaction_count(sender_address, 'pending'),
             "gas": 3000000,
             "gasPrice": w3.to_wei("20", "gwei")
         })

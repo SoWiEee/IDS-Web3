@@ -6,4 +6,5 @@ load_dotenv()
 
 GANACHE_URL = os.getenv("GANACHE_URL")
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
-CONTRACT_ADDRESS = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS"))
+CONTRACT_ADDRESS1 = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS1"))
+CONTRACT_ADDRESS2 = Web3.to_checksum_address(os.getenv("CONTRACT_ADDRESS2"))

@@ -161,7 +161,6 @@ def listen_sysmon_registry():
                 root = ET.fromstring(xml_str)
                 ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
 
-                #event_id = int(root.find('./ns:System/ns:EventID', ns).text)
                 record_id = int(root.find('./ns:System/ns:EventRecordID', ns).text)
 
                 if record_id in seen_records:

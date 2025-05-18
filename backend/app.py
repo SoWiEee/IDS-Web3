@@ -26,7 +26,7 @@ def create_logs():
 
         tx_hash = write_logs_to_contract(
             data["event_type"],
-            int(data["timestamp"]),
+            data["timestamp"],
             data["image"],
             data["command_line"],
             data["pid"],
@@ -79,7 +79,7 @@ def write_malicious_log():
 
 
 if __name__ == "__main__":
-    # Thread(target=listen_security_log, daemon=True).start()
-    # Thread(target=listen_sysmon, daemon=True).start()
+    Thread(target=listen_security_log, daemon=True).start()
+    Thread(target=listen_sysmon, daemon=True).start()
     Thread(target=listen_sysmon_registry, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
