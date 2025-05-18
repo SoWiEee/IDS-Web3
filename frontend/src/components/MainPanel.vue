@@ -116,7 +116,7 @@ onMounted(() => {
     }
   }
   fetchLogs()   // initial fetch
-  setInterval(fetchLogs, 5000)  // fetch every 5 seconds
+  setInterval(fetchLogs, 3000)  // fetch every 5 seconds
 })
 
 function formatTimestamp(ts) {
