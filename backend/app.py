@@ -10,7 +10,7 @@ from etw_listener import listen_security_log, listen_sysmon, listen_sysmon_regis
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])    # allow Vue call API
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 @app.route("/")
 def index():
@@ -110,7 +110,7 @@ def write_malicious_log():
 
 
 if __name__ == "__main__":
-    # Thread(target=listen_security_log, daemon=True).start()
+    Thread(target=listen_security_log, daemon=True).start()
     Thread(target=listen_sysmon, daemon=True).start()
-    # Thread(target=listen_sysmon_registry, daemon=True).start()
+    Thread(target=listen_sysmon_registry, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
