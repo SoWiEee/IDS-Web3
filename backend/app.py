@@ -23,8 +23,7 @@ def analyze_logs():
         logs = data.get('logs', [])
         if not logs:
             return jsonify({'result': '⚠️ 沒有收到任何紀錄資料'}), 400
-
-        # 將 log 紀錄整理為字串摘要
+        
         summary = "\n".join(
             f"{log.get('timestamp', '')} | {log.get('event_type', '')} | {log.get('command_line', '')}"
             for log in logs
@@ -32,12 +31,11 @@ def analyze_logs():
 
         prompt = f"""你是一個資安分析助理，請根據以下紀錄判斷是否有異常或惡意事件，並用繁體中文解釋：
 {summary}
-請指出可疑事件的時間、類型及可能風險。限制在 100 字內。"""
+請指出可疑事件的時間、類型及可能風險。限制在 120 字內。"""
 
-        # 送出 prompt，呼叫 Gemini 模型
+        # send prompt
         response = model.generate_content(prompt)
 
-        # 回傳模型的文字內容
         return jsonify({'result': response.text})
 
     except Exception as e:
