@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from config import GEMINI_API_KEY, GEMINI_API_SECRET
-from gemini import Gemini
+from config import GEMINI_API_KEY
+import google.generativeai as genai
 from flask_cors import CORS
 from blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
 from threading import Thread
@@ -9,7 +9,8 @@ from etw_listener import listen_security_log, listen_sysmon, listen_sysmon_regis
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])    # allow Vue call API
-gemini = Gemini(GEMINI_API_KEY, GEMINI_API_SECRET)
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-pro')
 
 @app.route("/")
 def index():
@@ -20,10 +21,10 @@ def analyze_logs():
     try:
         data = request.get_json()
         logs = data.get('logs', [])
-
         if not logs:
             return jsonify({'result': '⚠️ 沒有收到任何紀錄資料'}), 400
 
+        # 將 log 紀錄整理為字串摘要
         summary = "\n".join(
             f"{log.get('timestamp', '')} | {log.get('event_type', '')} | {log.get('command_line', '')}"
             for log in logs
@@ -31,10 +32,13 @@ def analyze_logs():
 
         prompt = f"""你是一個資安分析助理，請根據以下紀錄判斷是否有異常或惡意事件，並用繁體中文解釋：
 {summary}
-請指出可疑事件的時間、類型及可能風險。"""
+請指出可疑事件的時間、類型及可能風險。限制在 100 字內。"""
 
-        result = gemini.generate_content(prompt)
-        return jsonify({'result': result})
+        # 送出 prompt，呼叫 Gemini 模型
+        response = model.generate_content(prompt)
+
+        # 回傳模型的文字內容
+        return jsonify({'result': response.text})
 
     except Exception as e:
         return jsonify({'message': f'分析過程發生錯誤: {str(e)}'}), 500
@@ -106,7 +110,7 @@ def write_malicious_log():
 
 
 if __name__ == "__main__":
-    Thread(target=listen_security_log, daemon=True).start()
+    # Thread(target=listen_security_log, daemon=True).start()
     Thread(target=listen_sysmon, daemon=True).start()
-    Thread(target=listen_sysmon_registry, daemon=True).start()
+    # Thread(target=listen_sysmon_registry, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
