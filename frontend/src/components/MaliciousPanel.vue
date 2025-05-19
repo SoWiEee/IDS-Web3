@@ -6,21 +6,53 @@
         Malicious Detection Panel
       </v-card-title>
 
-      <v-data-table
-        :headers="headers"
-        :items="logs"
-        class="elevation-1"
-        :items-per-page="10"
-      >
-        <template #item.timestamp="{ item }">
-          <span class="text-secondary">{{ formatTimestamp(item.timestamp) }}</span>
+      <!-- Filter Area -->
+      <v-row class="pa-4" dense>
+        <v-col cols="12" sm="6" md="4">
+          <v-text-field
+            v-model="search"
+            label="模糊搜尋"
+            prepend-icon="mdi-magnify"
+            clearable
+          />
+        </v-col>
+
+        <v-col cols="12" sm="6" md="4">
+          <v-select
+            v-model="selectedEventTypes"
+            :items="eventTypeOptions"
+            label="事件類型篩選"
+            multiple
+            clearable
+          />
+        </v-col>
+      </v-row>
+
+      <v-data-table :items="logs" :items-per-page="10" class="elevation-1">
+        <template #headers>
+          <tr>
+            <th v-for="header in headers" :key="header.value" class="text-center text-primary" style="font-weight: bold; font-size: 18px;">
+              {{ header.text }}
+            </th>
+          </tr>
+        </template>
+
+        <template #item="{ item }">
+          <tr>
+            <td class="text-center">{{ item.event_type }}</td>
+            <td class="text-center">{{ item.image }}</td>
+            <td class="text-center">{{ item.command_line }}</td>
+            <td class="text-center">{{ item.detail }}</td>
+            <td class="text-center">{{ item.pid }}</td>
+            <td class="text-center">{{ item.user }}</td>
+            <td class="text-center">{{ formatTimestamp(item.timestamp) }}</td>
+          </tr>
         </template>
       </v-data-table>
     </v-card>
 
-    <!-- 🔵 AI 懸浮按鈕（固定右上角） -->
     <v-btn
-      color="deep-purple accent-4"
+      color="blue-accent-3"
       dark
       fab
       class="floating-ai-button"
@@ -29,7 +61,6 @@
       <v-icon>mdi-robot</v-icon>
     </v-btn>
 
-    <!-- 🔵 側邊抽屜顯示 AI 分析結果 -->
     <v-navigation-drawer v-model="drawer" right temporary>
       <v-card>
         <v-card-title>🧠 AI 分析結果</v-card-title>
@@ -66,7 +97,6 @@ const headers = [
   { text: 'Timestamp', value: 'timestamp', sortable: true },
 ]
 
-// AI 相關狀態
 const drawer = ref(false)
 const response = ref('')
 const loading = ref(false)
@@ -82,7 +112,7 @@ onMounted(() => {
     }
   }
   fetchLogs()
-  setInterval(fetchLogs, 3000)
+  setInterval(fetchLogs, 2000)
 })
 
 function formatTimestamp(ts) {

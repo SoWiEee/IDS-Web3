@@ -31,26 +31,33 @@
           </v-row>
 
           <!-- Table -->
-          <v-data-table
-            :headers="headers"
-            :items="filteredLogs"
-            class="elevation-1"
-            :search="''"
-            :items-per-page="10"
-          >
-            <template #item.timestamp="{ item }">
-              <span class="text-secondary">{{ formatTimestamp(item.timestamp) }}</span>
+          <v-data-table :items="filteredLogs" :items-per-page="10" class="elevation-1">
+            <template #headers>
+              <tr>
+                <th v-for="header in headers" :key="header.value" class="text-center text-primary" style="font-weight: bold; font-size: 18px;">
+                  {{ header.text }}
+                </th>
+              </tr>
             </template>
-            <template #item.event_type="{ item }">
-              <span class="text-primary font-weight-bold">{{ item.event_type }}</span>
+
+            <!-- 每一列 -->
+            <template #item="{ item }">
+              <tr>
+                <td class="text-center">{{ item.event_type }}</td>
+                <td class="text-center">{{ item.image }}</td>
+                <td class="text-center">{{ item.command_line }}</td>
+                <td class="text-center">{{ item.user }}</td>
+                <td class="text-center">{{ item.integrity_level }}</td>
+                <td class="text-center">{{ item.pid }}</td>
+                <td class="text-center">{{ formatTimestamp(item.timestamp) }}</td>
+              </tr>
             </template>
           </v-data-table>
         </v-card>
       </v-container>
 
-      <!-- 🔵 AI 懸浮按鈕（固定在右上角） -->
       <v-btn
-        color="deep-purple accent-4"
+        color="blue-accent-3"
         dark
         fab
         class="floating-ai-button"
@@ -59,7 +66,6 @@
         <v-icon>mdi-robot</v-icon>
       </v-btn>
 
-      <!-- 🔵 側邊抽屜 -->
       <v-navigation-drawer v-model="drawer" right temporary>
         <v-card>
           <v-card-title>🧠 AI 分析結果</v-card-title>
@@ -82,6 +88,7 @@
 </template>
 
 <script setup>
+
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import Fuse from 'fuse.js'
@@ -147,7 +154,7 @@ onMounted(() => {
     }
   }
   fetchLogs()
-  setInterval(fetchLogs, 3000)
+  setInterval(fetchLogs, 2000)
 })
 
 function formatTimestamp(ts) {
