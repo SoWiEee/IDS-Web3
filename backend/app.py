@@ -31,7 +31,7 @@ def analyze_logs():
 
         prompt = f"""你是一個資安分析助理，請根據以下紀錄判斷是否有異常或惡意事件，並用繁體中文解釋：
 {summary}
-請指出可疑事件的時間、類型及可能風險。限制在 120 字內。"""
+請指出可疑事件的時間、類型及可能風險。限制在 200 字內。"""
 
         # send prompt
         response = model.generate_content(prompt)
