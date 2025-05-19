@@ -31,16 +31,21 @@
           </v-row>
 
           <!-- Table -->
-          <v-data-table :items="filteredLogs" :items-per-page="10" class="elevation-1">
-            <template #headers>
-              <tr>
-                <th v-for="header in headers" :key="header.value" class="text-center text-primary" style="font-weight: bold; font-size: 18px;">
-                  {{ header.text }}
-                </th>
-              </tr>
+          <v-data-table
+            :headers="headers"
+            :items="filteredLogs"
+            :items-per-page="10"
+            class="elevation-1"
+            item-value="id"
+          >
+            <!-- self-defined header, reserve sorting -->
+            <template v-for="header in headers" #[`header.${header.value}`]="{ column }" :key="header.value">
+              <span class="text-center text-primary" style="font-weight: bold; font-size: 18px;">
+                {{ column.text }}
+              </span>
             </template>
 
-            <!-- 每一列 -->
+            <!-- data table -->
             <template #item="{ item }">
               <tr>
                 <td class="text-center">{{ item.event_type }}</td>
@@ -56,39 +61,16 @@
         </v-card>
       </v-container>
 
-      <v-btn
-        color="blue-accent-3"
-        dark
-        fab
-        class="floating-ai-button"
-        @click="triggerAI"
-      >
-        <v-icon>mdi-robot</v-icon>
-      </v-btn>
+      <AiButton :logs="logs" />
+      <AiDrawer />
 
-      <v-navigation-drawer v-model="drawer" right temporary>
-        <v-card>
-          <v-card-title>🧠 AI 分析結果</v-card-title>
-          <v-card-text>
-            <div v-if="loading">
-              <v-progress-circular indeterminate color="primary" />
-              <p class="mt-2">AI 正在分析中，請稍候...</p>
-            </div>
-            <div v-else-if="response">
-              <p style="white-space: pre-wrap;">{{ response }}</p>
-            </div>
-            <div v-else-if="error">
-              <v-alert type="error">{{ error }}</v-alert>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-navigation-drawer>
     </v-main>
   </v-app>
 </template>
 
 <script setup>
-
+import AiButton from '@/components/AiButton.vue'
+import AiDrawer from '@/components/AiDrawer.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import Fuse from 'fuse.js'
@@ -97,10 +79,6 @@ const logs = ref([])
 const search = ref('')
 const selectedEventTypes = ref([])
 const filteredLogs = ref([])
-const drawer = ref(false)
-const response = ref('')
-const loading = ref(false)
-const error = ref('')
 
 const headers = [
   { text: 'Event Type', value: 'event_type', sortable: true },
@@ -161,33 +139,7 @@ function formatTimestamp(ts) {
   const date = new Date(ts * 1000)
   return date.toLocaleString()
 }
-
-const triggerAI = async () => {
-  drawer.value = true
-  response.value = ''
-  loading.value = true
-  error.value = ''
-
-  try {
-    const recentLogs = logs.value.slice(-30)
-    const res = await axios.post('http://localhost:5000/api/analyze', {
-      logs: recentLogs
-    }, { timeout: 20000 })
-    response.value = res.data.result
-  } catch (err) {
-    error.value = err?.response?.data?.message || 'AI 分析失敗'
-  } finally {
-    loading.value = false
-  }
-}
-
 </script>
 
 <style scoped>
-.floating-ai-button {
-  position: fixed;
-  top: 80px;
-  right: 30px;
-  z-index: 9999;
-}
 </style>
