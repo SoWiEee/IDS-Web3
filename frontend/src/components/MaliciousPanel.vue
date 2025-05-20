@@ -29,12 +29,12 @@
       </v-row>
 
       <v-data-table
-            :headers="headers"
-            :items="logs"
-            :items-per-page="10"
-            class="elevation-1"
-            item-value="id"
-          >
+        :headers="headers"
+        :items="filteredLogs"
+        :items-per-page="10"
+        class="elevation-1"
+        item-value="id"
+      >
         <template v-for="header in headers" #[`header.${header.value}`]="{ column }" :key="header.value">
           <span class="text-center text-primary" style="font-weight: bold; font-size: 18px;">
             {{ column.text }}
@@ -57,17 +57,21 @@
 
     <AiButton :logs="logs" />
     <AiDrawer />
-
   </v-container>
 </template>
 
 <script setup>
 import AiButton from '@/components/AiButton.vue'
 import AiDrawer from '@/components/AiDrawer.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
+import Fuse from 'fuse.js'
 
 const logs = ref([])
+const search = ref('')
+const selectedEventTypes = ref([])
+
+const eventTypeOptions = ['Logon', 'DLL Injection', 'Registry']
 
 const headers = [
   { text: 'Technique', value: 'event_type', sortable: true },
@@ -79,6 +83,30 @@ const headers = [
   { text: 'Timestamp', value: 'timestamp', sortable: true },
 ]
 
+const fuseOptions = {
+  keys: ['event_type', 'image', 'command_line', 'detail', 'user'],
+  threshold: 0.3,
+}
+let fuse = null
+
+watch(logs, (newLogs) => {
+  fuse = new Fuse(newLogs, fuseOptions)
+})
+
+const filteredLogs = computed(() => {
+  let result = logs.value
+
+  if (search.value && fuse) {
+    result = fuse.search(search.value).map(res => res.item)
+  }
+
+  if (selectedEventTypes.value.length > 0) {
+    result = result.filter(item => selectedEventTypes.value.includes(item.event_type))
+  }
+
+  return result
+})
+
 onMounted(() => {
   const fetchLogs = async () => {
     try {
@@ -88,6 +116,7 @@ onMounted(() => {
       console.error('Error fetching logs:', e)
     }
   }
+
   fetchLogs()
   setInterval(fetchLogs, 2000)
 })
@@ -96,7 +125,6 @@ function formatTimestamp(ts) {
   const date = new Date(ts * 1000)
   return date.toLocaleString()
 }
-
 </script>
 
 <style scoped>
