@@ -84,14 +84,14 @@ const headers = [
   { text: 'Event Type', value: 'event_type', sortable: true },
   { text: 'Image', value: 'image', sortable: true },
   { text: 'Command Line', value: 'command_line', sortable: true },
-  { text: 'User', value: 'user', sortable: true },
-  { text: 'Integrity Level', value: 'integrity_level', sortable: true },
+  { text: 'Detail', value: 'detail', sortable: true },
   { text: 'PID', value: 'pid', sortable: true },
+  { text: 'User', value: 'user', sortable: true },
   { text: 'Timestamp', value: 'timestamp', sortable: true },
 ]
 
 const eventTypeOptions = computed(() => {
-  const set = new Set(logs.value.map(l => l.event_type))
+  const set = new Set(logs.value.map(log => log.event_type))
   return Array.from(set)
 })
 
@@ -106,7 +106,7 @@ const updateFilteredLogs = () => {
 
   if (search.value.trim() !== '' && fuse) {
     const fuseResults = fuse.search(search.value.trim())
-    temp = fuseResults.map(result => result.item)
+    temp = fuseResults.map(r => r.item)
   }
 
   filteredLogs.value = temp
@@ -114,8 +114,8 @@ const updateFilteredLogs = () => {
 
 watch(logs, () => {
   fuse = new Fuse(logs.value, {
-    keys: ['event_type', 'image', 'command_line', 'user', 'integrity_level', 'pid', 'timestamp'],
-    threshold: 0.6,
+    keys: ['event_type', 'image', 'command_line', 'detail', 'user'],
+    threshold: 0.4,
   })
   updateFilteredLogs()
 })
@@ -127,10 +127,11 @@ onMounted(() => {
     try {
       const response = await axios.get('http://localhost:5000/api/logs')
       logs.value = response.data
-    } catch (error) {
-      console.error('Error fetching logs:', error)
+    } catch (e) {
+      console.error('Error fetching logs:', e)
     }
   }
+
   fetchLogs()
   setInterval(fetchLogs, 2000)
 })
@@ -140,6 +141,3 @@ function formatTimestamp(ts) {
   return date.toLocaleString()
 }
 </script>
-
-<style scoped>
-</style>
