@@ -68,7 +68,7 @@ const handleClick = () => {
     violet,
     red
   );
-  animation: rotate-rgb 2s linear infinite;
+  animation: rotate-rgb 0.7s linear infinite;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
