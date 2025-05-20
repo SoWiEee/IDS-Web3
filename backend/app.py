@@ -5,7 +5,7 @@ from flask_cors import CORS
 from blockchain_adapter import write_logs_to_contract, get_logs_from_contract, write_maliciousLogs_to_contract, get_malicious_logs_from_contract
 from threading import Thread
 from etw_listener import listen_security_log, listen_sysmon, listen_sysmon_registry
-
+from frida_hook import start_hook
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])    # allow Vue call API
@@ -110,5 +110,6 @@ def write_malicious_log():
 if __name__ == "__main__":
     Thread(target=listen_security_log, daemon=True).start()
     Thread(target=listen_sysmon, daemon=True).start()
+    Thread(target=start_hook, daemon=True).start()
     Thread(target=listen_sysmon_registry, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
